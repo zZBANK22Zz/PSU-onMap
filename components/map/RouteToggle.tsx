@@ -3,13 +3,13 @@ import { Navigation, Clock } from 'lucide-react';
 import { SuggestedRoute } from '@/types';
 
 interface RouteToggleProps {
-  showRoutes: boolean;
+  showRoute: boolean;
   suggestedRoute: SuggestedRoute;
   onRouteToggle: (show: boolean) => void;
 }
 
 const RouteToggle: React.FC<RouteToggleProps> = ({
-  showRoutes,
+  showRoute,
   suggestedRoute,
   onRouteToggle
 }) => {
@@ -18,12 +18,12 @@ const RouteToggle: React.FC<RouteToggleProps> = ({
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
           <Navigation className="w-4 h-4 text-emerald-600" />
-          Suggested Route
+          เส้นทางแนะนำ
         </h3>
         <label className="relative inline-flex items-center cursor-pointer">
           <input
             type="checkbox"
-            checked={showRoutes}
+            checked={showRoute}
             onChange={(e) => onRouteToggle(e.target.checked)}
             className="sr-only peer"
           />
@@ -35,7 +35,7 @@ const RouteToggle: React.FC<RouteToggleProps> = ({
         <span className="flex items-center gap-1">
           <Clock className="w-3 h-3" /> {suggestedRoute.duration}
         </span>
-        <span>📍 {suggestedRoute.stops.length} stops</span>
+        <span>📍 {suggestedRoute.stops.length} จุดแวะ</span>
       </div>
     </div>
   );

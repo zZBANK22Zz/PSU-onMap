@@ -15,8 +15,12 @@ const LocationPopup: React.FC<LocationPopupProps> = ({ location, onClose }) => {
           <span className="text-4xl">{location.image}</span>
           <div className="text-left">
             <h4 className="font-bold text-gray-800 text-lg">{location.name}</h4>
-            <span className={`text-xs px-2 py-1 rounded-full bg-${location.color}-100 text-${location.color}-700`}>
-              {location.category === 'academic' ? 'Academic' : 'Service'}
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              location.category === 'academic' 
+                ? 'bg-blue-100 text-blue-700' 
+                : 'bg-green-100 text-green-700'
+            }`}>
+              {location.category === 'academic' ? 'อาคารเรียน' : 'บริการนักศึกษา'}
             </span>
           </div>
         </div>
@@ -35,20 +39,16 @@ const LocationPopup: React.FC<LocationPopupProps> = ({ location, onClose }) => {
       <div className="space-y-2 text-left">
         <div className="flex items-center gap-2 text-sm text-gray-700">
           <Clock className="w-4 h-4 text-blue-500" />
-          <span>{location.openingHours}</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-gray-700">
-          <MapPin className="w-4 h-4 text-green-500" />
-          <span>Lat: {location.lat}, Lng: {location.lng}</span>
+          <span><strong>เวลาเปิด-ปิด:</strong> {location.openingHours}</span>
         </div>
         <a
           href={location.website}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 mt-2"
         >
           <ExternalLink className="w-4 h-4" />
-          <span>Visit Website</span>
+          <span>เว็บไซต์: {location.website}</span>
         </a>
       </div>
     </div>

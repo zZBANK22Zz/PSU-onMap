@@ -17,7 +17,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
     <div className="mb-6">
       <h3 className="text-sm font-semibold text-gray-600 mb-3 flex items-center gap-2">
         <MapPin className="w-4 h-4" />
-        CATEGORIES
+        ประเภทสถานที่
       </h3>
       <div className="space-y-2">
         {categories.map((cat) => {

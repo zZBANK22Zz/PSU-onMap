@@ -1,28 +1,44 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { MapPin } from 'lucide-react';
+import { Location, SuggestedRoute } from '@/types';
+import MapLegend from '@/components/map/MapLegend';
+import LocationPopup from '@/components/map/LocationPopup';
 
 // Module-level variable to track if Google Maps script is being loaded
 let googleMapsScriptLoading = false;
 
-const MapView: React.FC = () => {
+interface MapViewProps {
+  locations: Location[];
+  selectedLocation: Location | null;
+  showRoute: boolean;
+  suggestedRoute: SuggestedRoute;
+  onLocationClose: () => void;
+}
+
+const MapView: React.FC<MapViewProps> = ({
+  locations,
+  selectedLocation,
+  showRoute,
+  suggestedRoute,
+  onLocationClose
+}) => {
   // Option 1: Google My Maps Embed (Easiest - No API key needed)
-  // Replace this with your Google My Maps embed URL
-  // To get the embed URL:
-  // 1. Go to https://www.google.com/maps/d/
-  // 2. Create or open your map
-  // 3. Click the three dots menu → "Embed on my site"
-  // 4. Copy the iframe src URL
   const GOOGLE_MY_MAPS_EMBED_URL = process.env.NEXT_PUBLIC_GOOGLE_MY_MAPS_URL || '';
 
-  // Default center point for PSU Phuket Campus
-  const mapCenter = { lat: 7.8912, lng: 98.3514 };
+  // Calculate center point from locations
+  const mapCenter = useMemo(() => {
+    if (locations.length === 0) return { lat: 7.8912, lng: 98.3514 };
+    const avgLat = locations.reduce((sum, loc) => sum + loc.lat, 0) / locations.length;
+    const avgLng = locations.reduce((sum, loc) => sum + loc.lng, 0) / locations.length;
+    return { lat: avgLat, lng: avgLng };
+  }, [locations]);
 
   // If Google My Maps URL is provided, use iframe embed
   if (GOOGLE_MY_MAPS_EMBED_URL) {
     return (
-      <div className="relative bg-gray-100">
+      <div className="lg:col-span-2 relative bg-gray-100">
         <div className="w-full h-[400px] lg:h-[calc(100vh-140px)] relative">
           <iframe
             src={GOOGLE_MY_MAPS_EMBED_URL}
@@ -34,7 +50,18 @@ const MapView: React.FC = () => {
             referrerPolicy="no-referrer-when-downgrade"
             className="w-full h-full"
           />
+          
+          {selectedLocation && (
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
+              <LocationPopup
+                location={selectedLocation}
+                onClose={onLocationClose}
+              />
+            </div>
+          )}
         </div>
+
+        <MapLegend showRoute={showRoute} />
       </div>
     );
   }
@@ -44,7 +71,14 @@ const MapView: React.FC = () => {
 
   if (GOOGLE_MAPS_API_KEY) {
     return (
-      <GoogleMapsView mapCenter={mapCenter} />
+      <GoogleMapsView
+        locations={locations}
+        selectedLocation={selectedLocation}
+        showRoute={showRoute}
+        suggestedRoute={suggestedRoute}
+        mapCenter={mapCenter}
+        onLocationClose={onLocationClose}
+      />
     );
   }
 
@@ -90,8 +124,13 @@ const MapView: React.FC = () => {
 
 // Google Maps JavaScript API Component
 const GoogleMapsView: React.FC<{
+  locations: Location[];
+  selectedLocation: Location | null;
+  showRoute: boolean;
+  suggestedRoute: SuggestedRoute;
   mapCenter: { lat: number; lng: number };
-}> = ({ mapCenter }) => {
+  onLocationClose: () => void;
+}> = ({ locations, selectedLocation, showRoute, suggestedRoute, mapCenter, onLocationClose }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [map, setMap] = useState<any>(null);
 
@@ -159,6 +198,10 @@ const GoogleMapsView: React.FC<{
     };
   }, []); // Empty dependency array - only run once on mount
 
+  const markersRef = React.useRef<any[]>([]);
+  const directionsRendererRef = React.useRef<any>(null);
+  const directionsServiceRef = React.useRef<any>(null);
+
   React.useEffect(() => {
     if (!isLoaded || !(window as any).google?.maps) return;
 
@@ -167,9 +210,10 @@ const GoogleMapsView: React.FC<{
 
     const google = (window as any).google;
     
-    // Create map
-    if (!map) {
-      const googleMap = new google.maps.Map(mapElement, {
+    // Create map if it doesn't exist
+    let currentMap = map;
+    if (!currentMap) {
+      currentMap = new google.maps.Map(mapElement, {
         center: mapCenter,
         zoom: 15,
         mapTypeId: 'roadmap',
@@ -181,18 +225,217 @@ const GoogleMapsView: React.FC<{
           }
         ]
       });
-      setMap(googleMap);
+      setMap(currentMap);
+      console.log('🗺️ Map created with center:', mapCenter);
     } else {
       // Update map center when mapCenter changes
-      map.setCenter(mapCenter);
+      currentMap.setCenter(mapCenter);
+      console.log('📍 Updated map center to:', mapCenter);
     }
-  }, [isLoaded, mapCenter, map]);
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current = [];
+
+    // Clear existing route
+    if (directionsRendererRef.current) {
+      directionsRendererRef.current.setMap(null);
+      directionsRendererRef.current = null;
+    }
+
+    // Create bounds to fit all markers
+    const bounds = new google.maps.LatLngBounds();
+
+    // Add markers for each location
+    locations.forEach((location) => {
+      const position = { lat: location.lat, lng: location.lng };
+      const latLng = new google.maps.LatLng(location.lat, location.lng);
+      
+      // Debug: Log position to console
+      console.log(`📍 Marker: ${location.name}`, {
+        lat: location.lat,
+        lng: location.lng,
+        position: position
+      });
+      
+      bounds.extend(latLng);
+
+      const marker = new google.maps.Marker({
+        position: position,
+        map: currentMap,
+        title: location.name,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: location.color === 'blue' ? '#3b82f6' : '#10b981',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+        },
+      });
+      
+      // Verify marker position after creation
+      const markerPosition = marker.getPosition();
+      if (markerPosition) {
+        console.log(`✅ Marker created at:`, {
+          lat: markerPosition.lat(),
+          lng: markerPosition.lng()
+        });
+      }
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `
+          <div style="padding: 8px; min-width: 200px;">
+            <h3 style="margin: 0 0 8px 0; font-weight: bold; font-size: 16px;">${location.name}</h3>
+            <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">${location.description}</p>
+            <div style="margin: 4px 0; font-size: 11px; color: #888;">
+              <strong>เวลาเปิด-ปิด:</strong> ${location.openingHours}
+            </div>
+            <a href="${location.website}" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: none; font-size: 12px;">
+              ดูเว็บไซต์ →
+            </a>
+          </div>
+        `,
+      });
+
+      marker.addListener('click', () => {
+        infoWindow.open(currentMap, marker);
+      });
+
+      markersRef.current.push(marker);
+    });
+
+    // Add route using Google Directions API if showRoute is true
+    if (showRoute && suggestedRoute.stops.length > 1) {
+      const routeStops = suggestedRoute.stops
+        .map((stopId) => {
+          const location = locations.find((loc) => loc.id === stopId);
+          return location ? { lat: location.lat, lng: location.lng } : null;
+        })
+        .filter((stop): stop is { lat: number; lng: number } => stop !== null);
+
+      if (routeStops.length > 1) {
+        // Initialize Directions Service and Renderer
+        if (!directionsServiceRef.current) {
+          directionsServiceRef.current = new google.maps.DirectionsService();
+        }
+
+        if (!directionsRendererRef.current) {
+          directionsRendererRef.current = new google.maps.DirectionsRenderer({
+            map: currentMap,
+            suppressMarkers: true, // Don't show default markers, use our custom ones
+            polylineOptions: {
+              strokeColor: '#10b981',
+              strokeWeight: 4,
+              strokeOpacity: 0.8,
+            },
+          });
+        } else {
+          directionsRendererRef.current.setMap(currentMap);
+        }
+
+        // Prepare waypoints (all stops except first and last)
+        const waypoints = routeStops.slice(1, -1).map(stop => ({
+          location: new google.maps.LatLng(stop.lat, stop.lng),
+          stopover: true,
+        }));
+
+        // Request directions
+        directionsServiceRef.current.route(
+          {
+            origin: new google.maps.LatLng(routeStops[0].lat, routeStops[0].lng),
+            destination: new google.maps.LatLng(
+              routeStops[routeStops.length - 1].lat,
+              routeStops[routeStops.length - 1].lng
+            ),
+            waypoints: waypoints,
+            travelMode: google.maps.TravelMode.WALKING, // Use walking mode for campus tour
+            optimizeWaypoints: false, // Keep the order we specified
+          },
+          (result: any, status: any) => {
+            if (status === google.maps.DirectionsStatus.OK && directionsRendererRef.current) {
+              directionsRendererRef.current.setDirections(result);
+              console.log('✅ Route calculated successfully');
+              
+              // Log route information
+              if (result.routes && result.routes[0]) {
+                const route = result.routes[0];
+                const leg = route.legs[0];
+                console.log('📍 Route info:', {
+                  distance: leg.distance?.text,
+                  duration: leg.duration?.text,
+                });
+              }
+            } else {
+              console.error('❌ Directions request failed:', status);
+              // Fallback to simple polyline if Directions API fails
+              const fallbackPath = routeStops.map(stop => 
+                new google.maps.LatLng(stop.lat, stop.lng)
+              );
+              const fallbackPolyline = new google.maps.Polyline({
+                path: fallbackPath,
+                geodesic: true,
+                strokeColor: '#10b981',
+                strokeOpacity: 0.8,
+                strokeWeight: 4,
+              });
+              fallbackPolyline.setMap(currentMap);
+            }
+          }
+        );
+      }
+    }
+
+    // Fit map to show all markers with padding
+    if (locations.length > 0) {
+      console.log('🗺️ Fitting bounds to show all markers');
+      console.log('Bounds:', {
+        north: bounds.getNorthEast().lat(),
+        south: bounds.getSouthWest().lat(),
+        east: bounds.getNorthEast().lng(),
+        west: bounds.getSouthWest().lng()
+      });
+      
+      currentMap.fitBounds(bounds, { padding: 80 });
+      
+      // Set minimum zoom level and log center
+      google.maps.event.addListenerOnce(currentMap, 'bounds_changed', () => {
+        const currentCenter = currentMap.getCenter();
+        const currentZoom = currentMap.getZoom();
+        console.log('📍 Map center after fitBounds:', {
+          lat: currentCenter?.lat(),
+          lng: currentCenter?.lng(),
+          zoom: currentZoom
+        });
+        
+        if (currentZoom && currentZoom > 18) {
+          currentMap.setZoom(16);
+        }
+      });
+    } else {
+      // If no locations, use default center
+      console.log('📍 No locations, using default center:', mapCenter);
+      currentMap.setCenter(mapCenter);
+      currentMap.setZoom(15);
+    }
+  }, [isLoaded, locations, showRoute, suggestedRoute, mapCenter, map]);
 
   return (
-    <div className="relative bg-gray-100">
+    <div className="lg:col-span-2 relative bg-gray-100">
       <div className="w-full h-[400px] lg:h-[calc(100vh-140px)] relative">
         <div id="google-map" className="w-full h-full" />
+        
+        {selectedLocation && (
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
+            <LocationPopup
+              location={selectedLocation}
+              onClose={onLocationClose}
+            />
+          </div>
+        )}
       </div>
+
+      <MapLegend showRoute={showRoute} />
     </div>
   );
 };
