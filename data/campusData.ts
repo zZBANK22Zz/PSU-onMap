@@ -56,7 +56,7 @@ export const locations: Location[] = [
   },
   {
     id: 6,
-    name: 'คณะการบริการและการท่องเที่ยว มหาวิทยาลัยสงขลานครินทร์',
+    name: 'Faculty of Service and Tourism, Prince of Songkhla University',
     category: 'academic',
     lat: 7.894105512588895,
     lng: 98.35187460416918,
