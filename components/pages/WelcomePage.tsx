@@ -37,12 +37,12 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ onStart }) => {
         {/* Hero Text */}
         <div className="text-center max-w-4xl mx-auto mb-8">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-800 mb-4 leading-tight">
-            Prince of Songkla University
+            PSU Phuket Map
           </h1>
           <div className="flex items-center justify-center gap-2 mb-6">
             <MapPin className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
             <h2 className="text-2xl md:text-4xl font-semibold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-              Phuket Campus
+              Virtual Campus Tour WebMap App
             </h2>
           </div>
           
