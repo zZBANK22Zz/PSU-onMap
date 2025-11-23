@@ -1,5 +1,6 @@
 import React from 'react';
 import { MapPin } from 'lucide-react';
+import { locations } from '@/data/campusData';
 
 interface MapLegendProps {
   showRoute?: boolean;
@@ -15,11 +16,11 @@ const MapLegend: React.FC<MapLegendProps> = ({ showRoute = false }) => {
       <div className="space-y-2 text-xs">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-          <span className="text-gray-700">อาคารเรียน (2)</span>
+          <span className="text-gray-700">อาคารเรียน {locations.filter(location => location.category === 'academic').length}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          <span className="text-gray-700">บริการนักศึกษา (4)</span>
+          <span className="text-gray-700">บริการนักศึกษา {locations.filter(location => location.category === 'service').length}</span>
         </div>
         {showRoute && (
           <div className="flex items-center gap-2 pt-2 border-t border-gray-200">

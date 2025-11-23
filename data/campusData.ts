@@ -5,7 +5,7 @@ export const locations: Location[] = [
   {
     id: 1,
     name: 'Central Library',
-    category: 'academic',
+    category: 'service',
     lat: 7.8936240256334615,
     lng: 98.35342848104702,
     // 7.8936240256334615, 98.35342848104702
@@ -13,12 +13,12 @@ export const locations: Location[] = [
     image: '📚',
     openingHours: 'Mon-Fri: 8:00-20:00, Sat-Sun: 9:00-17:00',
     website: 'https://library.psu.ac.th',
-    color: 'blue'
+    color: 'green'
   },
   {
     id: 2,
     name: 'Main Academic Building',
-    category: 'academic',
+    category: 'service',
     lat: 7.89446417925503,
     lng: 98.35289920804485,
     //7.89446417925503, 98.35289920804485
@@ -26,7 +26,7 @@ export const locations: Location[] = [
     image: '🏛️',
     openingHours: 'Mon-Fri: 7:00-18:00',
     website: 'https://phuket.psu.ac.th',
-    color: 'blue'
+    color: 'green'
   },
   {
     id: 4,
@@ -43,42 +43,68 @@ export const locations: Location[] = [
   },
   {
     id: 5,
-    name: '6th Building',
-    category: 'service',
+    name: '6th Building, Prince of Songkhla University',
+    category: 'academic',
     lat: 7.89340267675603,
     lng: 98.35226205143121,
     // 7.89340267675603, 98.35226205143121
-    description: '6th Building',
+    description: '6th Building, Prince of Songkhla University',
     image: '🏠',
     openingHours: '24/7',
     website: 'https://phuket.psu.ac.th/dorm',
-    color: 'green'
+    color: 'blue'
   },
   {
     id: 6,
-    name: 'คณะการบริการและการท่องเที่ยว มหาวิทยาลัยสงขลานครินทร์',
+    name: 'Faculty of Service and Tourism, Prince of Songkhla University',
     category: 'academic',
     lat: 7.894105512588895,
     lng: 98.35187460416918,
     // 7.894105512588895, 98.35187460416918
-    description: 'Hub for student clubs, events, and cultural activities',
-    image: '🎭',
+    description: 'Faculty of Service and Tourism, Prince of Songkhla University',
+    image: '💼',
     openingHours: 'Mon-Fri: 8:00-22:00, Sat-Sun: 10:00-20:00',
     website: 'https://phuket.psu.ac.th/activity',
-    color: 'green'
+    color: 'blue'
   },
   {
     id: 7,
-    name: 'คณะเทคโนโลยีและสิ่งแวดล้อม มหาวิทยาลัยสงขลานครินทร์',
+    name: 'Faculty of Technology and Environment, Prince of Songkhla University',
     category: 'academic',
     lat: 7.894905205992693,
     lng: 98.35201407904275,
     // 7.894905205992693, 98.35201407904275
-    description: 'Hub for student clubs, events, and cultural activities',
-    image: '🎭',
+    description: 'Faculty of Technology and Environment, Prince of Songkhla University',
+    image: '🔬',
     openingHours: 'Mon-Fri: 8:00-22:00, Sat-Sun: 10:00-20:00',
     website: 'https://phuket.psu.ac.th/activity',
-    color: 'green'
+    color: 'blue'
+  },
+  {
+    id: 8,
+    name: 'Faculty of International Studies, Prince of Songkhla University',
+    category: 'academic',
+    lat: 7.893823604635755,
+    lng: 98.35294329707587,
+    // 7.893823604635755, 98.35294329707587
+    description: 'Faculty of International Studies, Prince of Songkhla University',
+    image: '🌍',
+    openingHours: 'Mon-Fri: 8:00-22:00, Sat-Sun: 10:00-20:00',
+    website: 'https://phuket.psu.ac.th/activity',
+    color: 'blue'
+  },
+  {
+    id: 9,
+    name: 'College of Computing, Prince of Songkhla University',
+    category: 'academic',
+    lat: 7.893474572617563,
+    lng: 98.35218716794022,
+    // 7.893474572617563, 98.35218716794022
+    description: 'College of Computing, Prince of Songkhla University',
+    image: '💻',
+    openingHours: 'Mon-Fri: 8:00-22:00, Sat-Sun: 10:00-20:00',
+    website: 'https://phuket.psu.ac.th/activity',
+    color: 'blue'
   }
 ];
 
