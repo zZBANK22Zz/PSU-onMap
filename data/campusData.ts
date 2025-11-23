@@ -4,7 +4,7 @@ import { Location, Category, SuggestedRoute } from '@/types';
 export const locations: Location[] = [
   {
     id: 1,
-    name: 'Central Library',
+    name: 'Learning Center (Library)',
     category: 'service',
     lat: 7.8936240256334615,
     lng: 98.35342848104702,
@@ -17,7 +17,7 @@ export const locations: Location[] = [
   },
   {
     id: 2,
-    name: 'Main Academic Building',
+    name: "The President's Office, Phuket Campus",
     category: 'service',
     lat: 7.89446417925503,
     lng: 98.35289920804485,
